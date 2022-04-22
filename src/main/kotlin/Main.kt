@@ -224,6 +224,11 @@ fun main(args: Array<String>) {
                 "Направление: ${trainList.find { train -> train.number == trainRun.trainNumber }?.direction} " +
                 "Отправление: ${trainRun.startTime.format(DateTimeFormatter.ofPattern("M/d/y H:m:ss"))} " +
                 "Прибытие: ${trainRun.endTime.format(DateTimeFormatter.ofPattern("M/d/y H:m:ss"))} " +
-                "Машинист: ${driverList.find { driver ->  driver.id == trainRun.driverId }?.name}") }
-    println(driverList.map { it.totalHours })
+                "Машинист: ${driverList.find { driver -> driver.id == trainRun.driverId }?.name}"
+        )
+    }
+    println("Часов нужно отработать:")
+    driverList.forEach {
+        print( "${it.name}: ${it.totalHours}, ")
+    }
 }
