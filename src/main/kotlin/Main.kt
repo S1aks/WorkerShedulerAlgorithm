@@ -1,5 +1,6 @@
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 /**
@@ -193,7 +194,7 @@ val driverList = listOf(
 //    Driver(20,"Евлампий", "", "", 0, 0, listOf(32, 92, 72))
 )
 
-const val restHours = 16.toLong()
+const val restHours = 16.toLong()   // Константа опряделяющая количество часов отдыха после работы
 
 fun getBusyOrRestDriversIdsOnTime(trainRunList: List<TrainRun>, time: LocalDateTime): List<Int> {
     return trainRunList
@@ -203,13 +204,13 @@ fun getBusyOrRestDriversIdsOnTime(trainRunList: List<TrainRun>, time: LocalDateT
 }
 
 fun fillTrainRunListWithDrivers(trainRunList: List<TrainRun>, drivers: List<Driver>) {
-    (trainRunList).forEach { trainRun ->
+    trainRunList.forEach { trainRun ->
         if (trainRun.driverId == 0) {
             trainRun.driverId = drivers
                 .filter { it.id !in getBusyOrRestDriversIdsOnTime(trainRunList, trainRun.startTime) }
                 .filter { it.accessTrainsId.contains(trainRun.trainNumber) }
-                .minByOrNull { it.workedHours }?.id ?: 0
-            drivers.find { it.id == trainRun.driverId }?.workedHours =
+                .minByOrNull { it.totalHours }?.id ?: 0
+            drivers.find { it.id == trainRun.driverId }?.totalHours =
                 ChronoUnit.HOURS.between(trainRun.startTime, trainRun.endTime).toInt()
         }
     }
@@ -217,6 +218,12 @@ fun fillTrainRunListWithDrivers(trainRunList: List<TrainRun>, drivers: List<Driv
 
 fun main(args: Array<String>) {
     fillTrainRunListWithDrivers(trainRunList, driverList)
-    println(trainRunList.joinToString("\n"))
-    println(driverList.map { it.workedHours })
+    trainRunList.forEach { trainRun ->
+        println(" ${trainRun.id}. " +
+                "Поезд: ${trainRun.trainNumber} " +
+                "Направление: ${trainList.find { train -> train.number == trainRun.trainNumber }?.direction} " +
+                "Отправление: ${trainRun.startTime.format(DateTimeFormatter.ofPattern("M/d/y H:m:ss"))} " +
+                "Прибытие: ${trainRun.endTime.format(DateTimeFormatter.ofPattern("M/d/y H:m:ss"))} " +
+                "Машинист: ${driverList.find { driver ->  driver.id == trainRun.driverId }?.name}") }
+    println(driverList.map { it.totalHours })
 }
