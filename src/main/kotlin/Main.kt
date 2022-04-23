@@ -2,6 +2,7 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 
 /**
  * Класс Train определяет сущность поезда, необходимую для идентификации направления и вывода информации о нём.
@@ -22,14 +23,18 @@ data class Train(
  * @param trainNumber номер поезда
  * @param driverId Id машиниста
  * @param startTime время отправления
- * @param endTime время прибытия
+ * @param travelTime время пути в пункт назначения
+ * @param travelRestTime время отдыха перед отправлением обратно
+ * @param backTravelTime время пути обратно в пункт отправления
  */
 data class TrainRun(
     val id: Int,
     val trainNumber: Int,
     var driverId: Int,
     val startTime: LocalDateTime,
-    val endTime: LocalDateTime
+    val travelTime: Long,
+    val travelRestTime: Long,
+    val backTravelTime: Long
 )
 
 /**
@@ -39,8 +44,8 @@ data class TrainRun(
  * @param name имя машиниста
  * @param surname фамилия машиниста
  * @param patronymic отчество машиниста
- * @param workedHours отработано часов
- * @param totalHours всего рабочих часов
+ * @param workedTime отработано часов (в millis)
+ * @param totalTime всего рабочих часов (в millis)
  * @param accessTrainsId список доступных поездов (направлений)
  */
 data class Driver(
@@ -48,8 +53,8 @@ data class Driver(
     val name: String,
     val surname: String,
     val patronymic: String,
-    var workedHours: Int,
-    var totalHours: Int,
+    var workedTime: Long,
+    var totalTime: Long,
     var accessTrainsId: List<Int>
 )
 
@@ -68,106 +73,113 @@ val trainList = listOf(
     Train(125, "Киров")
 )
 
+val Int.hoursToMillis: Long
+    get() = TimeUnit.HOURS.toMillis(this.toLong())
+
+val Int.minutesToMillis: Long
+    get() = TimeUnit.MINUTES.toMillis(this.toLong())
+
+
 val trainRunList = listOf(
     TrainRun(
         1, 120, 0,
         LocalDateTime.of(2022, Month.APRIL, 1, 6, 30),
-        LocalDateTime.of(2022, Month.APRIL, 2, 1, 10),
+        8.hoursToMillis + 25.minutesToMillis, 6.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         2, 14, 0,
         LocalDateTime.of(2022, Month.APRIL, 1, 12, 30),
-        LocalDateTime.of(2022, Month.APRIL, 2, 5, 10),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         3, 92, 0,
         LocalDateTime.of(2022, Month.APRIL, 1, 16, 30),
-        LocalDateTime.of(2022, Month.APRIL, 1, 22, 10),
+        5.hoursToMillis, 5.hoursToMillis, 5.hoursToMillis
     ),
     TrainRun(
         4, 32, 0,
         LocalDateTime.of(2022, Month.APRIL, 2, 3, 30),
-        LocalDateTime.of(2022, Month.APRIL, 2, 12, 10),
+        6.hoursToMillis, 8.hoursToMillis, 6.hoursToMillis
     ),
     TrainRun(
         5, 51, 0,
         LocalDateTime.of(2022, Month.APRIL, 2, 6, 30),
-        LocalDateTime.of(2022, Month.APRIL, 2, 11, 12),
+        7.hoursToMillis, 4.hoursToMillis, 6.hoursToMillis
     ),
     TrainRun(
         6, 96, 0,
         LocalDateTime.of(2022, Month.APRIL, 2, 22, 30),
-        LocalDateTime.of(2022, Month.APRIL, 3, 2, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         7, 72, 0,
         LocalDateTime.of(2022, Month.APRIL, 3, 2, 30),
-        LocalDateTime.of(2022, Month.APRIL, 3, 5, 12),
+        7.hoursToMillis, 4.hoursToMillis, 7.hoursToMillis
     ),
     TrainRun(
         8, 120, 0,
         LocalDateTime.of(2022, Month.APRIL, 3, 6, 30),
-        LocalDateTime.of(2022, Month.APRIL, 4, 3, 12),
+        8.hoursToMillis, 4.hoursToMillis, 9.hoursToMillis
     ),
     TrainRun(
         9, 99, 0,
         LocalDateTime.of(2022, Month.APRIL, 3, 8, 30),
-        LocalDateTime.of(2022, Month.APRIL, 3, 23, 12),
+        13.hoursToMillis, 4.hoursToMillis, 13.hoursToMillis + 23.minutesToMillis
     ),
     TrainRun(
         10, 80, 0,
         LocalDateTime.of(2022, Month.APRIL, 3, 20, 30),
-        LocalDateTime.of(2022, Month.APRIL, 4, 15, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         11, 103, 0,
         LocalDateTime.of(2022, Month.APRIL, 4, 6, 30),
-        LocalDateTime.of(2022, Month.APRIL, 5, 12, 12),
+        8.hoursToMillis, 6.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         12, 120, 0,
         LocalDateTime.of(2022, Month.APRIL, 5, 6, 30),
-        LocalDateTime.of(2022, Month.APRIL, 6, 1, 12),
+        15.hoursToMillis, 4.hoursToMillis, 15.hoursToMillis
     ),
     TrainRun(
         13, 11, 0,
         LocalDateTime.of(2022, Month.APRIL, 5, 3, 30),
-        LocalDateTime.of(2022, Month.APRIL, 7, 11, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         14, 125, 0,
         LocalDateTime.of(2022, Month.APRIL, 6, 13, 30),
-        LocalDateTime.of(2022, Month.APRIL, 7, 1, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         15, 51, 0,
         LocalDateTime.of(2022, Month.APRIL, 7, 12, 30),
-        LocalDateTime.of(2022, Month.APRIL, 8, 5, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         16, 14, 0,
         LocalDateTime.of(2022, Month.APRIL, 8, 14, 30),
-        LocalDateTime.of(2022, Month.APRIL, 9, 18, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         17, 72, 0,
         LocalDateTime.of(2022, Month.APRIL, 8, 10, 30),
-        LocalDateTime.of(2022, Month.APRIL, 9, 22, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         18, 99, 0,
         LocalDateTime.of(2022, Month.APRIL, 8, 16, 30),
-        LocalDateTime.of(2022, Month.APRIL, 10, 1, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         19, 32, 0,
         LocalDateTime.of(2022, Month.APRIL, 9, 6, 30),
-        LocalDateTime.of(2022, Month.APRIL, 10, 1, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     ),
     TrainRun(
         20, 120, 0,
         LocalDateTime.of(2022, Month.APRIL, 9, 6, 30),
-        LocalDateTime.of(2022, Month.APRIL, 10, 1, 12),
+        8.hoursToMillis, 4.hoursToMillis, 8.hoursToMillis
     )
 )
 
@@ -194,12 +206,17 @@ val driverList = listOf(
 //    Driver(20,"Евлампий", "", "", 0, 0, listOf(32, 92, 72))
 )
 
-const val restHours = 16.toLong()   // Константа опряделяющая количество часов отдыха после работы
+const val restHours = 16  // Константа опряделяющая количество часов отдыха после работы
 
 fun getBusyOrRestDriversIdsOnTime(trainRunList: List<TrainRun>, time: LocalDateTime): List<Int> {
     return trainRunList
         .filter { it.driverId > 0 }
-        .filter { time >= it.startTime && time <= it.endTime.plusHours(restHours) }
+        .filter {
+            time >= it.startTime && time <= it.startTime.plus(
+                it.travelTime + it.travelRestTime + it.backTravelTime + restHours.hoursToMillis,
+                ChronoUnit.MILLIS
+            )
+        }
         .map { it.driverId }
 }
 
@@ -209,28 +226,43 @@ fun fillTrainRunListWithDrivers(trainRunList: List<TrainRun>, drivers: List<Driv
             trainRun.driverId = drivers
                 .filter { it.id !in getBusyOrRestDriversIdsOnTime(trainRunList, trainRun.startTime) }
                 .filter { it.accessTrainsId.contains(trainRun.trainNumber) }
-                .minByOrNull { it.totalHours }?.id ?: 0
-            val hours = drivers.find { it.id == trainRun.driverId }?.totalHours?.plus(ChronoUnit.HOURS.between(trainRun.startTime, trainRun.endTime).toInt())
-            if (hours != null) {
-                drivers.find { it.id == trainRun.driverId }?.totalHours = hours
+                .minByOrNull { it.totalTime }?.id ?: 0
+            val workTime = drivers.find { it.id == trainRun.driverId }?.totalTime?.plus(
+                trainRun.travelTime + trainRun.backTravelTime
+            )
+            if (workTime != null) {
+                drivers.find { it.id == trainRun.driverId }?.totalTime = workTime
             }
         }
     }
 }
 
+val Long.toTimeString: String
+    get() {
+        val hours = this / 1000 / 60 / 60
+        val minutes = this / 1000 / 60 % 60
+        return String.format("%2d:%02d", hours, minutes)
+    }
+
 fun main(args: Array<String>) {
     fillTrainRunListWithDrivers(trainRunList, driverList)
     trainRunList.forEach { trainRun ->
-        println(" ${trainRun.id}. " +
-                "Поезд: ${trainRun.trainNumber} " +
-                "Направление: ${trainList.find { train -> train.number == trainRun.trainNumber }?.direction} " +
-                "Отправление: ${trainRun.startTime.format(DateTimeFormatter.ofPattern("d.MM.y H:m:ss"))} " +
-                "Прибытие: ${trainRun.endTime.format(DateTimeFormatter.ofPattern("d.MM.y H:m:ss"))} " +
-                "Машинист: ${driverList.find { driver -> driver.id == trainRun.driverId }?.name}"
+        println(
+            " ${trainRun.id}. " +
+                    "Поезд: ${trainRun.trainNumber} " +
+                    "Направление: ${trainList.find { train -> train.number == trainRun.trainNumber }?.direction} " +
+                    "Отправление: ${trainRun.startTime.format(DateTimeFormatter.ofPattern("d.MM.y H:m:ss"))} " +
+                    "Возврат: ${
+                        trainRun.startTime.plus(
+                            trainRun.travelTime + trainRun.travelRestTime + trainRun.backTravelTime,
+                            ChronoUnit.MILLIS
+                        ).format(DateTimeFormatter.ofPattern("d.MM.y H:m:ss"))
+                    } " +
+                    "Машинист: ${driverList.find { driver -> driver.id == trainRun.driverId }?.name}"
         )
     }
     println("Часов нужно отработать:")
     driverList.forEach {
-        print( "${it.name}: ${it.totalHours}, ")
+        print("${it.name}: ${it.totalTime.toTimeString}, ")
     }
 }
