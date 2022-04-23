@@ -210,8 +210,10 @@ fun fillTrainRunListWithDrivers(trainRunList: List<TrainRun>, drivers: List<Driv
                 .filter { it.id !in getBusyOrRestDriversIdsOnTime(trainRunList, trainRun.startTime) }
                 .filter { it.accessTrainsId.contains(trainRun.trainNumber) }
                 .minByOrNull { it.totalHours }?.id ?: 0
-            drivers.find { it.id == trainRun.driverId }?.totalHours =
-                ChronoUnit.HOURS.between(trainRun.startTime, trainRun.endTime).toInt()
+            val hours = drivers.find { it.id == trainRun.driverId }?.totalHours?.plus(ChronoUnit.HOURS.between(trainRun.startTime, trainRun.endTime).toInt())
+            if (hours != null) {
+                drivers.find { it.id == trainRun.driverId }?.totalHours = hours
+            }
         }
     }
 }
