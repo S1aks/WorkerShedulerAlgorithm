@@ -73,10 +73,10 @@ val trainList = listOf(
     Train(125, "Киров")
 )
 
-val Int.hoursToMillis: Long
+val Int.hoursToMillis: Long // Экстеншн для интового значения часов для перевода в милисекунды
     get() = TimeUnit.HOURS.toMillis(this.toLong())
 
-val Int.minutesToMillis: Long
+val Int.minutesToMillis: Long // Экстеншн для интового значения минут для перевода в милисекунды
     get() = TimeUnit.MINUTES.toMillis(this.toLong())
 
 
@@ -208,28 +208,41 @@ val driverList = listOf(
 
 const val restHours = 16  // Константа опряделяющая количество часов отдыха после работы
 
+/**
+ * Метод для выборки из списка выезда поездов машинистов (в определенное время) и возврат списка Id тех машинистов,
+ * которые в рейсе или на отдыхе после рейса. Т.е. списка тех кого нельзя ставить на новый выезд в
+ * определенное время.
+ */
 fun getBusyOrRestDriversIdsOnTime(trainRunList: List<TrainRun>, time: LocalDateTime): List<Int> {
     return trainRunList
-        .filter { it.driverId > 0 }
+        .filter { it.driverId > 0 } // Отсеиваем записи в которых машинисты еще не назначены
         .filter {
             time >= it.startTime && time <= it.startTime.plus(
                 it.travelTime + it.travelRestTime + it.backTravelTime + restHours.hoursToMillis,
                 ChronoUnit.MILLIS
             )
-        }
-        .map { it.driverId }
+        }   // Выбираем тех, кто в рейсе или на отдыхе после рейса
+        .map { it.driverId }    // Мапим в список их Id
 }
 
+/**
+ * Метод для заполнения списка выезда поездов машинистами из списка машинистов по алгоритму
+ */
 fun fillTrainRunListWithDrivers(trainRunList: List<TrainRun>, drivers: List<Driver>) {
-    trainRunList.forEach { trainRun ->
-        if (trainRun.driverId == 0) {
-            trainRun.driverId = drivers
+    trainRunList.forEach { trainRun ->  // Для каждого выезда поезда
+        if (trainRun.driverId == 0) {   // Если машинист не назначен
+            trainRun.driverId = drivers // Берём список машинистов
+                // Отсеиваем тех кто занят или на отдыхе
                 .filter { it.id !in getBusyOrRestDriversIdsOnTime(trainRunList, trainRun.startTime) }
+                // Отсеиваем тех, кто не имеет доступа к этому поезду
                 .filter { it.accessTrainsId.contains(trainRun.trainNumber) }
+                // Из оставшихся выбираем того машиниста, у которого меньше всего отработано часов
                 .minByOrNull { it.totalTime }?.id ?: 0
+            // Рассчитываем рабочее время в поездке
             val workTime = drivers.find { it.id == trainRun.driverId }?.totalTime?.plus(
                 trainRun.travelTime + trainRun.backTravelTime
             )
+            // Если расчет успешный, прибавляем время поездки к рабочему времени машиниста
             if (workTime != null) {
                 drivers.find { it.id == trainRun.driverId }?.totalTime = workTime
             }
@@ -237,7 +250,7 @@ fun fillTrainRunListWithDrivers(trainRunList: List<TrainRun>, drivers: List<Driv
     }
 }
 
-val Long.toTimeString: String
+val Long.toTimeString: String   // Экстеншн для перевода рабочего времени в строку вывода
     get() {
         val hours = this / 1000 / 60 / 60
         val minutes = this / 1000 / 60 % 60
