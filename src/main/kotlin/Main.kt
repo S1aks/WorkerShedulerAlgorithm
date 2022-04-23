@@ -224,8 +224,8 @@ fun main(args: Array<String>) {
         println(" ${trainRun.id}. " +
                 "Поезд: ${trainRun.trainNumber} " +
                 "Направление: ${trainList.find { train -> train.number == trainRun.trainNumber }?.direction} " +
-                "Отправление: ${trainRun.startTime.format(DateTimeFormatter.ofPattern("M/d/y H:m:ss"))} " +
-                "Прибытие: ${trainRun.endTime.format(DateTimeFormatter.ofPattern("M/d/y H:m:ss"))} " +
+                "Отправление: ${trainRun.startTime.format(DateTimeFormatter.ofPattern("d.MM.y H:m:ss"))} " +
+                "Прибытие: ${trainRun.endTime.format(DateTimeFormatter.ofPattern("d.MM.y H:m:ss"))} " +
                 "Машинист: ${driverList.find { driver -> driver.id == trainRun.driverId }?.name}"
         )
     }
